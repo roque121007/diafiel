@@ -43,20 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 60),
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF6C5CE7), Color(0xFF00CEC9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.check_circle_outline,
-                    color: Colors.white, size: 32),
-              ).animate().fadeIn(duration: 400.ms).scale(),
               const SizedBox(height: 32),
               Text('Bienvenido de nuevo',
                       style: theme.textTheme.headlineMedium
