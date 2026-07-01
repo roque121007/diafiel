@@ -130,6 +130,37 @@ class _TareaFormScreenState extends State<TareaFormScreen> {
     if (mounted) setState(() => _guardando = false);
   }
 
+  Future<void> _eliminar() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Eliminar tarea'),
+        content: const Text('¿Estás seguro? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true || !mounted) return;
+
+    try {
+      await context.read<TareasProvider>().eliminarTarea(widget.tarea!.id);
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) showAppSnackBar(context, mensaje: e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -284,6 +315,28 @@ class _TareaFormScreenState extends State<TareaFormScreen> {
                       : Text(esEdicion ? 'Guardar cambios' : 'Crear tarea'),
                 ),
               ).animate().fadeIn(delay: 200.ms),
+              if (esEdicion) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _guardando ? null : _eliminar,
+                    icon: const Icon(Icons.delete_outline_rounded,
+                        color: AppColors.danger),
+                    label: const Text(
+                      'Eliminar tarea',
+                      style: TextStyle(color: AppColors.danger),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: const BorderSide(color: AppColors.danger),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 250.ms),
+              ],
             ],
           ),
         ),

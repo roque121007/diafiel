@@ -30,13 +30,17 @@ class NotificationService {
 
     await _plugin.initialize(settings);
 
-    // Canal de alta prioridad para que suene y aparezca como heads-up
+    // Canal de alta prioridad para que suene y aparezca como heads-up.
+    // Usamos un ID nuevo (v2) porque Android bloquea cambios de sonido/importancia
+    // en canales que ya existían en el dispositivo con otra configuración.
     const channel = AndroidNotificationChannel(
-      'tareas_recordatorios',
+      'tareas_recordatorios_v2',
       'Recordatorios de tareas',
       description: 'Notificaciones de fecha límite de tus tareas',
       importance: Importance.max,
-      playSound: true,
+      playSound: true, // usa el sonido de notificación por defecto del sistema
+      enableVibration: true,
+      enableLights: true,
     );
 
     await _plugin
@@ -49,6 +53,8 @@ class NotificationService {
 
   Future<void> solicitarPermisos() async {
     await Permission.notification.request();
+    // Permiso para alarmas exactas (Android 12+) - necesario para que la notificación
+    // dispare exactamente a la hora programada, incluso con restricciones de batería.
     await Permission.scheduleExactAlarm.request();
   }
 
@@ -67,16 +73,19 @@ class NotificationService {
       tz.TZDateTime.from(fechaRecordatorio, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'tareas_recordatorios',
+          'tareas_recordatorios_v2',
           'Recordatorios de tareas',
           channelDescription: 'Notificaciones de fecha límite de tus tareas',
           importance: Importance.max,
           priority: Priority.high,
           category: AndroidNotificationCategory.reminder,
+          playSound: true,
+          enableVibration: true,
           fullScreenIntent: false,
         ),
         iOS: DarwinNotificationDetails(
           interruptionLevel: InterruptionLevel.timeSensitive,
+          presentSound: true,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
